@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Meeting History{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📚 Meeting History</h2>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary">New Analysis</a>
+    </div>
+
+    {% if meetings.items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>File Name</th>
+                        <th>Transcript Preview</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for meeting in meetings.items %}
+                    <tr>
+                        <td>
+                            <small class="text-muted">{{ meeting.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ meeting.filename }}</strong>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ meeting.transcript[:80] }}...</small>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('view_meeting', meeting_id=meeting.id) }}" class="btn btn-sm btn-info">View</a>
+                            <form method="post" action="{{ url_for('delete_meeting', meeting_id=meeting.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this meeting?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if meetings.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if meetings.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('history', page=meetings.prev_num) }}">Previous</a>
+                </li>
+                {% endif %}
+
+                {% for page_num in meetings.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == meetings.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('history', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if meetings.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('history', page=meetings.next_num) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <strong>No meetings yet.</strong> Upload your first meeting recording to get started.
+            <a href="{{ url_for('index') }}" class="alert-link">Go to dashboard</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

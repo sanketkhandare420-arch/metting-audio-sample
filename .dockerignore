@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+.env
+instance/
+uploads/
+meeting_history.db
+*.db
+.DS_Store

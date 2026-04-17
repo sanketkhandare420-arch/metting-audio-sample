@@ -1,0 +1,10 @@
+openai-whisper
+transformers
+torch
+spacy
+nltk
+flask
+flask-sqlalchemy
+deep-translator
+gTTS
+gunicorn

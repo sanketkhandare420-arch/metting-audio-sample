@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis Results{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="mb-4 text-center">
+        <h1 class="mb-2">📊 Analysis Results</h1>
+        <p class="text-muted">Review transcript details, translated audio, summaries, dialogue formatting, and extracted action items.</p>
+    </div>
+
+    <div class="row gy-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">📝 Meeting Transcript</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ transcript }}</p>
+                </div>
+            </div>
+
+            {% if translated_text %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">🌍 Translated Text</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ translated_text }}</p>
+                    {% if audio_file_name %}
+                    <div class="mt-3">
+                        <a href="{{ url_for('download_file', filename=audio_file_name) }}" class="btn btn-success">
+                            Download Translated Audio
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if summary %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">📋 Summary</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ summary }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if dialogue_text %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">💬 Dialogue Format</h5>
+                </div>
+                <div class="card-body">
+                    <pre class="card-text bg-light p-3 rounded">{{ dialogue_text }}</pre>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">🎯 Extracted Action Items</h5>
+                </div>
+                <div class="card-body">
+                    {% if actions %}
+                        {% for action in actions %}
+                            <div class="mb-3 p-3 rounded" style="background: #f8f9fa; border-left: 5px solid #28a745;">
+                                <strong>{{ loop.index }}.</strong> {{ action }}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No action items were detected in this transcript.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title">Next steps</h5>
+                    <p class="text-muted mb-3">✅ This analysis has been saved to your history.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('history') }}" class="btn btn-info">View History</a>
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Analyze Another File</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
