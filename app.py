@@ -9,6 +9,8 @@ from gtts import gTTS
 import uuid
 import json
 from models import db, Meeting
+import subprocess
+import sys
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a random secret key
@@ -20,7 +22,21 @@ db.init_app(app)
 
 # Create database tables
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Database initialization error: {e}")
+
+# Download spacy model if not present
+try:
+    import spacy
+    try:
+        nlp = spacy.load("en_core_web_sm")
+    except OSError:
+        print("Downloading spacy model...")
+        subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
+except Exception as e:
+    print(f"Spacy model initialization warning: {e}")
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -119,71 +135,80 @@ def index():
             dialogue = 'dialogue' in request.form
             generate_audio = 'generate_audio' in request.form
 
-            # Process the audio file
-            transcript = transcribe_audio(filepath)
-            if not transcript:
-                flash('Failed to transcribe audio. Please check the file format.')
-                os.remove(filepath)  # Clean up
-                return redirect(request.url)
+            try:
+                # Process the audio file
+                transcript = transcribe_audio(filepath)
+                if not transcript:
+                    flash('Failed to transcribe audio. Please check the file format.')
+                    os.remove(filepath)  # Clean up
+                    return redirect(request.url)
 
-            actions = extract_action_items(transcript)
+                actions = extract_action_items(transcript)
 
-            # Apply additional processing
-            translated_text = None
-            summary = None
-            dialogue_text = None
-            audio_file_path = None
+                # Apply additional processing
+                translated_text = None
+                summary = None
+                dialogue_text = None
+                audio_file_path = None
 
-            if translate:
-                translated_text = translate_text(transcript, target_lang)
-                if generate_audio and translated_text:
-                    # Map language codes to gTTS supported languages
-                    lang_map = {
-                        'es': 'es', 'fr': 'fr', 'de': 'de', 'it': 'it', 'pt': 'pt',
-                        'ru': 'ru', 'ja': 'ja', 'ko': 'ko', 'zh-cn': 'zh-cn',
-                        'ar': 'ar', 'hi': 'hi'
-                    }
-                    tts_lang = lang_map.get(target_lang, 'en')
-                    audio_file_path = generate_audio_from_text(translated_text, tts_lang)
-                    audio_file_name = os.path.basename(audio_file_path) if audio_file_path else None
+                if translate:
+                    translated_text = translate_text(transcript, target_lang)
+                    if generate_audio and translated_text:
+                        # Map language codes to gTTS supported languages
+                        lang_map = {
+                            'es': 'es', 'fr': 'fr', 'de': 'de', 'it': 'it', 'pt': 'pt',
+                            'ru': 'ru', 'ja': 'ja', 'ko': 'ko', 'zh-cn': 'zh-cn',
+                            'ar': 'ar', 'hi': 'hi'
+                        }
+                        tts_lang = lang_map.get(target_lang, 'en')
+                        audio_file_path = generate_audio_from_text(translated_text, tts_lang)
+                        audio_file_name = os.path.basename(audio_file_path) if audio_file_path else None
+                    else:
+                        audio_file_name = None
                 else:
                     audio_file_name = None
-            else:
-                audio_file_name = None
-            
-            if summarize:
-                summary = summarize_text(transcript)
-            
-            if dialogue:
-                dialogue_text = format_as_dialogue(transcript)
+                
+                if summarize:
+                    summary = summarize_text(transcript)
+                
+                if dialogue:
+                    dialogue_text = format_as_dialogue(transcript)
 
-            # Clean up the uploaded file
-            if os.path.exists(filepath):
-                os.remove(filepath)
+                # Clean up the uploaded file
+                if os.path.exists(filepath):
+                    os.remove(filepath)
 
-            # Save analysis to database
-            meeting = Meeting(
-                filename=filename,
-                transcript=transcript,
-                action_items=json.dumps(actions),
-                translated_text=translated_text,
-                summary=summary,
-                dialogue_text=dialogue_text,
-                audio_file_name=audio_file_name,
-                target_lang=target_lang if translate else None
-            )
-            db.session.add(meeting)
-            db.session.commit()
+                # Save analysis to database
+                meeting = Meeting(
+                    filename=filename,
+                    transcript=transcript,
+                    action_items=json.dumps(actions),
+                    translated_text=translated_text,
+                    summary=summary,
+                    dialogue_text=dialogue_text,
+                    audio_file_name=audio_file_name,
+                    target_lang=target_lang if translate else None
+                )
+                db.session.add(meeting)
+                db.session.commit()
 
-            return render_template('result.html',
-                                   transcript=transcript,
-                                   actions=actions,
-                                   translated_text=translated_text,
-                                   summary=summary,
-                                   dialogue_text=dialogue_text,
-                                   audio_file_name=audio_file_name,
-                                   target_lang=target_lang,
-                                   meeting_id=meeting.id)
+                return render_template('result.html',
+                                       transcript=transcript,
+                                       actions=actions,
+                                       translated_text=translated_text,
+                                       summary=summary,
+                                       dialogue_text=dialogue_text,
+                                       audio_file_name=audio_file_name,
+                                       target_lang=target_lang,
+                                       meeting_id=meeting.id)
+            except Exception as e:
+                print(f"Processing error: {e}")
+                import traceback
+                traceback.print_exc()
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                flash(f'Error processing audio: {str(e)}')
+                return redirect(request.url)
         else:
             flash('Invalid file type. Supported formats: WAV, MP3, M4A, FLAC, OGG, WEBM')
             return redirect(request.url)
