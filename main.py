@@ -7,7 +7,7 @@ def transcribe_audio(file_path):
     Transcribes audio file to text using OpenAI Whisper.
     """
     try:
-        model = whisper.load_model("base")  # You can change to "small", "medium", "large" for better accuracy
+        model = whisper.load_model("tiny")  # Use the smallest Whisper model for lower size and CPU-only deployment
         result = model.transcribe(file_path)
         return result["text"]
     except Exception as e:
