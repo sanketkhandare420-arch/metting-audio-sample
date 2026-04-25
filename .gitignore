@@ -21,3 +21,5 @@ instance/
 *.swo
 *~
 .pytest_cache/
+ngrok.exe
+ngrok.zip

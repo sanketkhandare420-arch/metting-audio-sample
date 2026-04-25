@@ -110,8 +110,12 @@ def generate_audio_from_text(text, lang='en'):
         print(f"TTS error: {e}")
         return None
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
     if request.method == 'POST':
         # Check if the post request has the file part
         if 'file' not in request.files:
@@ -256,10 +260,10 @@ def download_file(filename):
             return send_file(file_path, as_attachment=True, download_name=f"translated_audio_{filename}")
         else:
             flash('File not found')
-            return redirect(url_for('index'))
+            return redirect(url_for('dashboard'))
     except Exception as e:
         flash('Error downloading file')
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     import os

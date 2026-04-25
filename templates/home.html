@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Audio Meeting Assistant{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="mb-4">Welcome to Audio Meeting Assistant</h1>
+            <p class="lead text-muted">Easily transcribe meeting audio, extract action items, translate transcripts, and save your meeting history — all from one intuitive web app.</p>
+            <ul class="list-unstyled mt-4">
+                <li class="mb-3"><strong>✔️ Transcription:</strong> Convert recordings into text using Whisper.</li>
+                <li class="mb-3"><strong>✔️ Action items:</strong> Extract clear follow-up tasks from every meeting.</li>
+                <li class="mb-3"><strong>✔️ Translation:</strong> Translate transcripts and download spoken audio.</li>
+                <li class="mb-3"><strong>✔️ History:</strong> Save and revisit past meeting analyses anytime.</li>
+            </ul>
+            <div class="d-flex gap-3 mt-4">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                <a href="{{ url_for('history') }}" class="btn btn-outline-primary btn-lg">View History</a>
+            </div>
+        </div>
+        <div class="col-lg-6 mt-4 mt-lg-0">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">How it works</h4>
+                    <p class="card-text text-muted">Upload your meeting recording or record live audio, choose processing options, and generate an actionable meeting summary instantly.</p>
+                    <div class="mt-4">
+                        <div class="mb-3">
+                            <strong>Step 1:</strong> Upload or record an audio file.
+                        </div>
+                        <div class="mb-3">
+                            <strong>Step 2:</strong> Select translation, summary, or dialogue formatting.
+                        </div>
+                        <div class="mb-3">
+                            <strong>Step 3:</strong> Review results and save them to history.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

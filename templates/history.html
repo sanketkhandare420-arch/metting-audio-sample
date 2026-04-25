@@ -6,7 +6,7 @@
 <div class="page-card">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>📚 Meeting History</h2>
-        <a href="{{ url_for('index') }}" class="btn btn-outline-primary">New Analysis</a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">New Analysis</a>
     </div>
 
     {% if meetings.items %}
@@ -79,7 +79,7 @@
     {% else %}
         <div class="alert alert-info" role="alert">
             <strong>No meetings yet.</strong> Upload your first meeting recording to get started.
-            <a href="{{ url_for('index') }}" class="alert-link">Go to dashboard</a>
+            <a href="{{ url_for('dashboard') }}" class="alert-link">Go to dashboard</a>
         </div>
     {% endif %}
 </div>
